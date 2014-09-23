@@ -1,0 +1,34 @@
+groups:
+  *) circle (c)
+  *) square (s)
+  *) triangle (t)
+  *) dot (d)
+  *) double dot (dd)
+  *) triple dot (ddd)
+  *) one line (I)
+  *) two lines (II)
+  *) three lines (III)
+  *) blue (B)
+  *) yellow (Y)
+  *) red (R)
+
+
+MIND (counter-clockwise): 
+1	YI
+2	Yd
+3	Ycd
+4	Bcd
+5	BcII
+6	BII
+7	RII
+8	Rdd
+9	Rsdd
+10	Ysdd
+11	YsIII
+12	YIII
+13	BIII
+14	Bddd
+15	Btddd
+16	Rtddd
+17	RtI
+18	RI
