@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class TonccRenderer extends JLayeredPane {
 
-	private final static int CELL_SIZE = 54; // pixels
+	private final static int CELL_SIZE = 55; // pixels
 	private final static int KINGDOMS_CELL_SIZE = 34; // pixels
 
 	/** @param toncc The Toncc table to render
@@ -23,11 +23,11 @@ public class TonccRenderer extends JLayeredPane {
 	public TonccRenderer(final Toncc toncc, int... sizes) {
 		this.toncc = toncc;
 		
-		/* Here I prefer explicit all components' bounds rather than using
+		/* Here I prefer expliciting all components' bounds rather than using
 		 * a LayoutManager, since the cells have a fixed size, and creating
 		 * the correct layout with a LayoutManager would be difficult.
 		 */
-		int[] ncells = { 3, 4, 5, 4, 3 };
+		final int[] ncells = { 3, 4, 5, 4, 3 };
 		int count = 0;
 		cellSize = CELL_SIZE;
 		kingdomsCellSize = KINGDOMS_CELL_SIZE;
@@ -39,6 +39,7 @@ public class TonccRenderer extends JLayeredPane {
 			if(sizes[0] > 0)
 				cellSize = sizes[0];
 		}
+
 		for(int line = 0; line < 5; ++line) {
 			for(int i = 0; i < ncells[line]; ++i) {
 				TonccCellRenderer cell = null;
@@ -54,12 +55,13 @@ public class TonccRenderer extends JLayeredPane {
 					else
 						cell = new TonccCellRenderer(toncc.getCell(count++));
 				}
-				int x = line == 2 
+				int x = cellSize +
+					(line == 2 
 					? cellSize * i
 					: line % 2 == 0 
 						? cellSize * (i + 1)
-						: cellSize / 2 + cellSize * i,
-				    y = line * cellSize,
+						: cellSize / 2 + cellSize * i),
+				    y = (line + 1) * cellSize,
 				    w = cellSize;
 				cell.setBounds(x, y, w, w);
 				cellRenderers.put(cell.getCell().id(), cell);
@@ -83,18 +85,20 @@ public class TonccRenderer extends JLayeredPane {
 		 */
 		count = 0;
 		// first line (a single cell)
-		TonccCellRenderer cell = new TonccCellRenderer(new TonccCell(toncc.MIND[count++]), kingdomsCellSize);
+		TonccCellRenderer cell = new TonccCellRenderer(
+				new TonccCell(Toncc.MIND[count++]), kingdomsCellSize);
 		cell.setBounds(kingdomsCellSize * 3, 0, kingdomsCellSize, kingdomsCellSize);
 		kgCellRenderers.put(cell.getCell().id(), cell);
 		kingdoms.add(cell);
 		// mid lines (2 cells per line)
 		for(int line = 1; line < 6; ++line) {
 			for(int i = 0; i < 2; ++i) {
-				cell = 
-					new TonccCellRenderer(new TonccCell(
-						i == 0 ? toncc.MIND[count] : toncc.MIND[toncc.TONCC_CELLS_NUM - count]),
+				cell = 	new TonccCellRenderer(new TonccCell(
+						i == 0 
+							? Toncc.MIND[count] 
+							: Toncc.MIND[Toncc.TONCC_CELLS_NUM - count]),
 						kingdomsCellSize);
-				cell.setBounds(	(int)(kingdomsCellSize * (3 - line / 2. + line * i)), 
+				cell.setBounds((int)(kingdomsCellSize * (3 - line / 2. + line * i)), 
 						kingdomsCellSize * line,
 						kingdomsCellSize,
 						kingdomsCellSize);
@@ -105,8 +109,9 @@ public class TonccRenderer extends JLayeredPane {
 		}
 		// last line (seven cells, not two)
 		for(int i = 0; i < 7; ++i) {
-			cell = new TonccCellRenderer(new TonccCell(toncc.MIND[count++]), kingdomsCellSize);
-			cell.setBounds(	(int)(kingdomsCellSize * i), 
+			cell = new TonccCellRenderer(
+					new TonccCell(Toncc.MIND[count++]), kingdomsCellSize);
+			cell.setBounds(kingdomsCellSize * i, 
 					kingdomsCellSize * 6,
 					kingdomsCellSize,
 					kingdomsCellSize);
@@ -121,7 +126,7 @@ public class TonccRenderer extends JLayeredPane {
 
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(cellSize * 8, cellSize * 8);
+		return new Dimension(cellSize * 10, cellSize * 10);
 	}
 
 	public static void main(String[] args) {
@@ -143,9 +148,9 @@ public class TonccRenderer extends JLayeredPane {
 		SwingConsole.run(frame, "Toncc Renderer");
 	}
 
-	protected Map<String,TonccCellRenderer> cellRenderers = new HashMap<>();
-	protected Map<String,TonccCellRenderer> kgCellRenderers = new HashMap<>();
+	protected Map<String, TonccCellRenderer> cellRenderers = new HashMap<>();
+	protected Map<String, TonccCellRenderer> kgCellRenderers = new HashMap<>();
+	protected int cellSize, kingdomsCellSize;
 	protected final Toncc toncc;
 	private final JPanel kingdoms;
-	private int cellSize, kingdomsCellSize;
 }

@@ -65,7 +65,7 @@ public class Toncc {
 
 	/** @return map { owner: [ { cell1, cell2, ...}, { cell1, ... }, ... ], ... } of kingdoms */
 	public final Map<String,List<Set<String>>> getKingdoms() {
-		Map<String,List<Set<String>>> kingdoms = new HashMap<>();
+		Map<String, List<Set<String>>> kingdoms = new HashMap<>();
 		Set<String> owners = new HashSet<>();
 		for(TonccCell cell : cells) {
 			if(cell.getOwner() != null) {
@@ -86,23 +86,28 @@ public class Toncc {
 			if(i == 5 || i == 11 || i == 17) continue;
 			boolean owned = true;
 			for(int j = 0; j < 3; ++j) {
-				if(	!(getCell(MIND[(i+j) % TONCC_CELLS_NUM]).getOwner() != null &&
-					getCell(MIND[(i+j) % TONCC_CELLS_NUM]).getOwner().equals(owner))
-				) {
-					//System.err.println("cell["+(i+j)%TONCC_CELLS_NUM+"] has owner "+
-					//	cells[(i+j)%TONCC_CELLS_NUM].getOwner());
+				final String cellOwner = getCell(MIND[(i+j) % TONCC_CELLS_NUM]).getOwner();
+				if(cellOwner == null || !cellOwner.equals(owner)) {
 					owned = false;
 					break;
 				}
 			}
 			if(owned) {
-				//System.err.println("isOwned: " + cells[i].id());
 				kingdoms.add(new HashSet<String>(Arrays.asList(
 					new String[] { MIND[i], MIND[i + 1], MIND[(i + 2) % TONCC_CELLS_NUM] })));
 			}
 		}
-		//System.err.println(kingdoms);
 		return kingdoms;
+	}
+
+	/** Returns number of cells owned by `owner` */
+	public final int getNOwned(final String owner) {
+		int n = 0;
+		for(final TonccCell cell : cells) {
+			if(cell.getOwner() != null && cell.getOwner().equals(owner))
+				++n;
+		}
+		return n;
 	}
 
 	/////// PRIVATE METHODS AND FIELDS ///////
