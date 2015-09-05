@@ -17,6 +17,7 @@ import static java.awt.event.KeyEvent.*;
 public class TonccGame extends TonccRenderer {
 
 	public final static String[] KINGS = { "Red", "Blue", "Yellow" };
+	static final int KING_SIZE = 34;
 
 	enum Direction {
 		TOP_LEFT,
@@ -42,8 +43,30 @@ public class TonccGame extends TonccRenderer {
 	
 	public TonccGame(final Toncc toncc, int... sizes) {
 		super(toncc, sizes);
-		
-		playerManager = new PlayerManager(toncc);
+	
+		// Save the references to the cells before we add
+		// any other component to this panel
+		for (int i = 0; i < getComponentCount(); ++i)
+			cells.add(getComponent(i));
+
+		playerManager = new PlayerManager(this);
+
+		king[0] = new King(King.Color.RED);
+		king[1] = new King(King.Color.BLUE);
+		king[2] = new King(King.Color.YELLOW);
+
+		// get the MIND position
+		Rectangle mindBounds = cells.get(9).getBounds();
+		for (int i = 0; i < 3; ++i)
+			king[i].getSprite().setBounds(
+					mindBounds.x + kingXOffset[i], 
+					mindBounds.y + kingYOffset[i],
+					KING_SIZE, 
+					KING_SIZE);
+
+		add(king[0].getSprite(), new Integer(2));
+		add(king[1].getSprite(), new Integer(2));
+		add(king[2].getSprite(), new Integer(3));
 
 		for(Map.Entry<String,TonccCellRenderer> entry : cellRenderers.entrySet()) {
 			final TonccCellRenderer tcr = entry.getValue();
@@ -90,42 +113,42 @@ public class TonccGame extends TonccRenderer {
 		// TRIGGER WARNING: the following code is horribly hacky, don't judge.
 
 		/// Top left movement
-		Rectangle bounds = getComponent(0).getBounds();
+		Rectangle bounds = cells.get(0).getBounds();
 		JLabel lab = new JLabel(_join(commands.get(Direction.TOP_LEFT)));
 		lab.setBounds((int)(bounds.getX() - cellSize),
 				(int)(bounds.getY() - 1.2 * cellSize), 
 				2 * cellSize, 2 * cellSize);
 		add(lab, new Integer(2));
 		// Top right
-		bounds = getComponent(3).getBounds();
+		bounds = cells.get(2).getBounds();
 		lab = new JLabel(_join(commands.get(Direction.TOP_RIGHT)));
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY() - 1.2 * cellSize), 
 				2 * cellSize, 2 * cellSize);
 		add(lab, new Integer(2));
 		// Left
-		bounds = getComponent(9).getBounds();
+		bounds = cells.get(7).getBounds();
 		lab = new JLabel(_join(commands.get(Direction.LEFT), ",<br>"));
 		lab.setBounds((int)(bounds.getX() - 0.5 * cellSize),
 				(int)(bounds.getY() - 0.5 * cellSize), 
 				2 * cellSize, 2 * cellSize);
 		add(lab, new Integer(2));
 		// Right
-		bounds = getComponent(14).getBounds();
+		bounds = cells.get(11).getBounds();
 		lab = new JLabel(_join(commands.get(Direction.RIGHT), ",<br>"));
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY() - 0.5 * cellSize), 
 				2 * cellSize, 2 * cellSize);
 		add(lab, new Integer(2));
 		// Bottom left
-		bounds = getComponent(20).getBounds();
+		bounds = cells.get(16).getBounds();
 		lab = new JLabel(_join(commands.get(Direction.BOTTOM_LEFT)));
 		lab.setBounds((int)(bounds.getX() - cellSize),
 				(int)(bounds.getY()), 
 				2 * cellSize, 2 * cellSize);
 		add(lab, new Integer(2));
 		// Bottom right
-		bounds = getComponent(23).getBounds();
+		bounds = cells.get(18).getBounds();
 		lab = new JLabel(_join(commands.get(Direction.BOTTOM_RIGHT)));
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY()), 
@@ -134,7 +157,9 @@ public class TonccGame extends TonccRenderer {
 	}
 
 	public static void main(String[] args) {
-		int cs = -1, kcs = -1;
+		int cs = -1,  // cell size
+		    kcs = -1; // kingdoms (mind) cell size
+
 		for(int i = 0; i < args.length; ++i) {
 			final String arg = args[i];
 			switch(arg) {
@@ -175,7 +200,7 @@ public class TonccGame extends TonccRenderer {
 		c.gridy = 1;
 		c.gridheight = 1;
 		frame.add(renderer.playerManager, c);
-
+		
 		frame.addKeyListener(renderer.playerMovesListener);
 
 		SwingConsole.run(frame, "Play Toncc!");
@@ -187,11 +212,11 @@ public class TonccGame extends TonccRenderer {
 
 	private static String _join(Integer[] it, String del) {
 		StringBuilder sb = new StringBuilder("<html>");
-		sb.append(getKeyText(it[0]));
+		sb.append("<font color=\"red\">"+getKeyText(it[0])+"</font>");
 		sb.append(del);
-		sb.append(getKeyText(it[1]));
+		sb.append("<font color=\"blue\">"+getKeyText(it[1])+"</font>");
 		sb.append(del);
-		sb.append(getKeyText(it[2]).replaceAll("NumPad\\-", ""));
+		sb.append("<font color=\"#fd9100\">"+getKeyText(it[2]).replaceAll("NumPad\\-", "")+"</font>");
 		sb.append("</html>");
 		return sb.toString();
 	}
@@ -219,4 +244,11 @@ outer:
 			playerManager.selectMove(king, d);
 		}
 	};
+
+	King[] king = new King[3];
+	private int[] kingXOffset = new int[] { 0, KING_SIZE*2/3, KING_SIZE/3 };
+	private int[] kingYOffset = new int[] { 0, 0, KING_SIZE/2 };
+
+	/** The references to all cells in the toncc, indexed from 0 to TONCC_CELLS_NUM-1 */
+	java.util.List<Component> cells = new ArrayList<>();
 }

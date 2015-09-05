@@ -7,12 +7,12 @@ import java.awt.*;
 import java.util.*;
 
 class PlayerManager extends JPanel {
-	private static final int KING_SIZE = 34;
 	private static final int INITIAL_TOKENS = 6;
 
-	public PlayerManager(final Toncc toncc) {
+	public PlayerManager(final TonccGame tonccGame) {
 
-		this.toncc = toncc;
+		this.tonccGame = tonccGame;
+		toncc = tonccGame.toncc;
 
 		for(String color : TonccGame.KINGS) {
 			positions.put(color, new TonccCoordinate(0, 0));
@@ -46,7 +46,7 @@ class PlayerManager extends JPanel {
 				add(new JLabel(new ImageIcon(
 					ImageIO.read(getClass().getClassLoader()
 					.getResourceAsStream("toncc/images/" + color.toLowerCase() + ".png"))
-					.getScaledInstance(-1, KING_SIZE, Image.SCALE_SMOOTH))));
+					.getScaledInstance(-1, TonccGame.KING_SIZE, Image.SCALE_SMOOTH))));
 			} catch(IOException e) {
 				System.err.println("[PlayerManager] Error loading image:");
 				e.printStackTrace();
@@ -115,8 +115,23 @@ class PlayerManager extends JPanel {
 			positions.get(col).move(d);
 		}
 		selectedMove.clear();
+		SwingUtilities.invokeLater(() -> {
+			for (Map.Entry<String, JLabel> entry : moveLabels.entrySet()) {
+				entry.getValue().setIcon(undecidedIcon);
+
+				// Move king's sprite
+				final String col = entry.getKey();
+				final King k = tonccGame.king[col.equals("Red") ? 0
+							: col.equals("Blue") ? 1 : 2];
+				final int idx = positions.get(col).asCellIndex();
+				final Rectangle bounds = tonccGame.cells.get(idx).getBounds();
+				k.getSprite().setBounds(bounds.x, bounds.y, TonccGame.KING_SIZE, TonccGame.KING_SIZE);
+				k.getSprite().repaint();
+			}
+		});
 	}
 
+	private final TonccGame tonccGame;
 	private final Toncc toncc;
 	private ImageIcon decidedIcon, undecidedIcon;
 
@@ -136,9 +151,9 @@ class PlayerManager extends JPanel {
 	 * - moving in LEFT direction decrements only y by 1 (moving RIGHT increments);
 	 * - if a move would result in a coordinate with mod > 4, the
 	 *   boundary conditions apply:
-	 *   1) if direction was *_LEFT, swap original x and z;
-	 *   2) if direction was *_RIGHT, swap original x and y, and flip their sign;
-	 *   3) else, just flip all coordinates' signs.
+	 *   1) if direction was TOP_RIGHT or BOTTOM_LEFT, swap original x and z;
+	 *   2) if direction was TOP_LEFT or BOTTOM_RIGHT, swap original x and y, and flip their sign;
+	 *   3) if direction was LEFT or RIGHT, swap original y and z, and flip their sign.
 	 */
 	private class TonccCoordinate {
 		TonccCoordinate(int x, int y) {
@@ -148,6 +163,7 @@ class PlayerManager extends JPanel {
 		}
 		
 		void move(TonccGame.Direction d) {
+			int origX = x, origY = y, origZ = y - x;
 			switch(d) {
 			case TOP_LEFT:
 				--y;
@@ -170,37 +186,38 @@ class PlayerManager extends JPanel {
 				++x;
 			}
 			z = y - x;
-			if (mod() > 4) {
+			if (Math.abs(z) > 2 || Math.abs(x) > 2 || Math.abs(y) > 2) {
 				switch(d) {
 				case TOP_LEFT:
-				case BOTTOM_LEFT:
-					{
-						int tmp = z;
-						z = x;
-						x = tmp;
-						break;
-					}
-				case TOP_RIGHT:
 				case BOTTOM_RIGHT:
 					{
-						int tmp = y;
-						y = -x;
+						int tmp = origY;
+						y = -origX;
 						x = -tmp;
 						break;
 					}
+				case TOP_RIGHT:
+				case BOTTOM_LEFT:
+					x = origZ;
+					break;
 				default:
-					y = -y;
-					x = -x;
+					y = -origZ;
 				}
 			}
+			z = y - x;
 		}
 
 		public int getX() { return x; }
 		public int getY() { return y; }
 
+		/** @return the current position as the cell index in the Toncc */
+		public int asCellIndex() {
+			return 9 + y + (int)((Math.abs(x) == 1 ? 4 : 3.5) * x);
+		}
+
 		@Override
 		public String toString() {
-			return "(" + x + ", " + y + ", " + z + ")";
+			return "(" + x + ", " + y + ", " + z + "; idx = " + asCellIndex() + ")";
 		}
 
 		private int mod() {
