@@ -7,7 +7,6 @@ import java.awt.*;
 import java.util.*;
 
 class PlayerManager extends JPanel {
-	private static final int INITIAL_TOKENS = 6;
 
 	public PlayerManager(final TonccGame tonccGame) {
 
@@ -17,7 +16,7 @@ class PlayerManager extends JPanel {
 		for(String color : TonccGame.KINGS) {
 			positions.put(color, new TonccCoordinate(0, 0));
 			scoreLabels.put(color, new JLabel("0")); 
-			tokenLabels.put(color, new JLabel(""+INITIAL_TOKENS));
+			tokenLabels.put(color, new JLabel(""+TonccGame.INITIAL_TOKENS));
 			moveLabels.put(color, new JLabel(undecidedIcon));
 		}
 
@@ -93,19 +92,24 @@ class PlayerManager extends JPanel {
 		for(String color : TonccGame.KINGS) {
 			int nOwned = toncc.getNOwned(color);
 			JLabel lab = tokenLabels.get(color);
-			lab.setText(""+(INITIAL_TOKENS - nOwned));
+			lab.setText(""+(TonccGame.INITIAL_TOKENS - nOwned));
 			SwingUtilities.invokeLater(() -> lab.repaint());
 		}
 	}
 
 	void selectMove(final String king, final TonccGame.Direction direction) {
 		selectedMove.put(king, direction);
-		if(selectedMove.size() == TonccGame.KINGS.length) {
+		if(selectedMove.size() == tonccGame.activeKings.size()) {
 			moveKings();
+			tonccGame.checkCaptures();
 		} else {
 			moveLabels.get(king).setIcon(decidedIcon);
 			SwingUtilities.invokeLater(() -> moveLabels.get(king).repaint());
 		}
+	}
+
+	void givePoints(final String king, final int amount) {
+		scoreLabels.get(king).setText(""+(Integer.parseInt(scoreLabels.get(king).getText()) + amount));
 	}
 
 	private void moveKings() {
@@ -113,6 +117,10 @@ class PlayerManager extends JPanel {
 			final String col = pair.getKey();
 			final TonccGame.Direction d = pair.getValue();
 			positions.get(col).move(d);
+			final int kidx = col.equals("Red") ? 0 : col.equals("Blue") ? 1 : 2;
+			final King k = tonccGame.king[kidx];
+			final int idx = positions.get(col).asCellIndex();
+			k.setPosition(idx);
 		}
 		selectedMove.clear();
 		SwingUtilities.invokeLater(() -> {
@@ -121,11 +129,14 @@ class PlayerManager extends JPanel {
 
 				// Move king's sprite
 				final String col = entry.getKey();
-				final King k = tonccGame.king[col.equals("Red") ? 0
-							: col.equals("Blue") ? 1 : 2];
 				final int idx = positions.get(col).asCellIndex();
 				final Rectangle bounds = tonccGame.cells.get(idx).getBounds();
-				k.getSprite().setBounds(bounds.x, bounds.y, TonccGame.KING_SIZE, TonccGame.KING_SIZE);
+				final int kidx = col.equals("Red") ? 0 : col.equals("Blue") ? 1 : 2;
+				final King k = tonccGame.king[kidx];
+				k.getSprite().setBounds(
+						bounds.x + TonccGame.kingXOffset[kidx],
+						bounds.y + TonccGame.kingYOffset[kidx],
+						TonccGame.KING_SIZE, TonccGame.KING_SIZE);
 				k.getSprite().repaint();
 			}
 		});
@@ -185,6 +196,8 @@ class PlayerManager extends JPanel {
 				++y;
 				++x;
 			}
+			// Avoid stepping on the MIND after exiting it
+			if (x == 0 && y == 0) move(d);
 			z = y - x;
 			if (Math.abs(z) > 2 || Math.abs(x) > 2 || Math.abs(y) > 2) {
 				switch(d) {

@@ -18,6 +18,7 @@ public class TonccGame extends TonccRenderer {
 
 	public final static String[] KINGS = { "Red", "Blue", "Yellow" };
 	static final int KING_SIZE = 34;
+	static final int INITIAL_TOKENS = 1;
 
 	enum Direction {
 		TOP_LEFT,
@@ -55,14 +56,19 @@ public class TonccGame extends TonccRenderer {
 		king[1] = new King(King.Color.BLUE);
 		king[2] = new King(King.Color.YELLOW);
 
+
 		// get the MIND position
 		Rectangle mindBounds = cells.get(9).getBounds();
-		for (int i = 0; i < 3; ++i)
-			king[i].getSprite().setBounds(
+		for (int i = 0; i < 3; ++i) {
+			final JLabel sprite = king[i].getSprite();
+			sprite.setBounds(
 					mindBounds.x + kingXOffset[i], 
 					mindBounds.y + kingYOffset[i],
 					KING_SIZE, 
 					KING_SIZE);
+			SwingUtilities.invokeLater(() -> sprite.repaint());
+			activeKings.add(king[i].getColorString());
+		}
 
 		add(king[0].getSprite(), new Integer(2));
 		add(king[1].getSprite(), new Integer(2));
@@ -206,6 +212,60 @@ public class TonccGame extends TonccRenderer {
 		SwingConsole.run(frame, "Play Toncc!");
 	}
 
+	void checkCaptures() {
+		// Keep track of { cell id => occupier king's index }
+		Map<String, Integer> occupiedBy = new HashMap<>();
+		for (int i = 0; i < 3; ++i) {
+			final int idx = king[i].getPosition();
+			if (idx == 9) {
+				// ignore the MIND
+				continue;
+			}
+			// Check if idx-th cell is occupied
+			TonccCellRenderer cell = (TonccCellRenderer)cells.get(idx);
+			if (cell.getCell().getState() == TonccCell.State.CAPTURED)
+				continue;
+
+			final String cellId =  cell.getCell().id();
+			final Integer otheridx = occupiedBy.get(cellId);
+			if (otheridx == null) {
+				occupiedBy.put(cellId, i);
+			} else {
+				// Another king is on the cell: check who prevails
+				if (king[i].prevailsOn(king[otheridx], cellId))
+					occupiedBy.put(cellId, i);
+			}
+		}
+		for (Map.Entry<String, Integer> entry : occupiedBy.entrySet()) {
+			final String cellId = entry.getKey();
+			final int kidx = entry.getValue();
+			toncc.getCell(cellId).setOwner(king[kidx].getColorString());
+			toncc.getCell(cellId).setState(TonccCell.State.CAPTURED);
+			kgCellRenderers.get(cellId).setOwner(king[kidx].getColorString());	
+			king[kidx].decTokens();
+			if (king[kidx].getTokens() == 0) {
+				king[kidx].setGameOver(true);
+				int score = 0;
+				for (int i = 0; i < 3; ++i) {
+					if (!king[i].isGameOver())
+						++score;
+				}
+				Rectangle bounds = cells.get(9).getBounds();
+				king[kidx].getSprite().setBounds(
+						bounds.x + kingXOffset[kidx],
+						bounds.y + kingYOffset[kidx],
+						KING_SIZE, KING_SIZE);
+				playerManager.givePoints(king[kidx].getColorString(), score);
+				activeKings.remove(king[kidx].getColorString());
+			}
+		}
+		playerManager.updateScore();
+		SwingUtilities.invokeLater(() -> {
+			repaint();
+			kingdoms.repaint();
+		});
+	}
+
 	private static String _join(Integer[] it) {
 		return _join(it, ", ");
 	}
@@ -240,14 +300,16 @@ outer:
 				}
 			}
 			if(idx == -1) return;
-			final String king = KINGS[idx];
-			playerManager.selectMove(king, d);
+			if (king[idx].isGameOver()) return;
+			final String k = KINGS[idx];
+			playerManager.selectMove(k, d);
 		}
 	};
 
 	King[] king = new King[3];
-	private int[] kingXOffset = new int[] { 0, KING_SIZE*2/3, KING_SIZE/3 };
-	private int[] kingYOffset = new int[] { 0, 0, KING_SIZE/2 };
+	java.util.List<String> activeKings = new ArrayList<>();
+	final static int[] kingXOffset = new int[] { 0, KING_SIZE*2/3, KING_SIZE/3 };
+	final static int[] kingYOffset = new int[] { 0, 0, KING_SIZE/2 };
 
 	/** The references to all cells in the toncc, indexed from 0 to TONCC_CELLS_NUM-1 */
 	java.util.List<Component> cells = new ArrayList<>();

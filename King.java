@@ -42,8 +42,46 @@ class King {
 		}
 	}
 
+	public boolean prevailsOn(final King other, final String cellId) {
+		Color col = null;
+		switch (cellId.charAt(0)) {
+		case 'R': col = Color.RED; break;
+		case 'B': col = Color.BLUE; break;
+		case 'Y': col = Color.YELLOW; break;
+		}
+		return color == col ||
+			(color.getMediumColor() == col
+			 && other.color != col);
+	}
+
 	public JLabel getSprite() { return sprite; }
+
+	@Override
+	public String toString() { return color + " King"; }
+
+	public void setPosition(int cellIdx) {
+		position = cellIdx;
+	}
+	public int getPosition() { return position; }
+
+	public void decTokens() { --tokens; }
+	public int getTokens() { return tokens; }
+
+	public void setGameOver(boolean b) { gameOver = b; }
+	public boolean isGameOver() { return gameOver; }
+
+	public String getColorString() {
+		switch (color) {
+		case RED: return "Red";
+		case BLUE: return "Blue";
+		case YELLOW: return "Yellow";
+		}
+		return "";
+	}
 	
 	private King.Color color;
 	private JLabel sprite;
+	private int position;
+	private int tokens = TonccGame.INITIAL_TOKENS; 
+	private boolean gameOver;
 }

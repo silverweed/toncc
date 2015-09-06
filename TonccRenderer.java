@@ -152,5 +152,5 @@ public class TonccRenderer extends JLayeredPane {
 	protected Map<String, TonccCellRenderer> kgCellRenderers = new HashMap<>();
 	protected int cellSize, kingdomsCellSize;
 	protected final Toncc toncc;
-	private final JPanel kingdoms;
+	protected final JPanel kingdoms;
 }
