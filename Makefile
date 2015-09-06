@@ -1,9 +1,5 @@
-classes := $(patsubst %.java,%.class,$(wildcard *.java))
-
-all: $(classes) 
-
-%.class: %.java
-	javac -Xlint:all -Xlint:-serial $<
+all:
+	javac -Xlint:all -Xlint:-serial *.java
 
 .PHONY: clean
 clean:

@@ -57,8 +57,10 @@ class PlayerManager extends JPanel {
 	}
 
 	void updateScore() {
-		for(final String king : TonccGame.KINGS)
-			updateScore(king);
+		for(King k : tonccGame.king) {
+			if (!k.isGameOver())
+				updateScore(k.getColorString());
+		}
 	}
 
 	void updateScore(final String king) {
@@ -133,13 +135,19 @@ class PlayerManager extends JPanel {
 				final Rectangle bounds = tonccGame.cells.get(idx).getBounds();
 				final int kidx = col.equals("Red") ? 0 : col.equals("Blue") ? 1 : 2;
 				final King k = tonccGame.king[kidx];
-				k.getSprite().setBounds(
-						bounds.x + TonccGame.kingXOffset[kidx],
-						bounds.y + TonccGame.kingYOffset[kidx],
-						TonccGame.KING_SIZE, TonccGame.KING_SIZE);
-				k.getSprite().repaint();
+				if (!k.isGameOver()) {
+					k.getSprite().setBounds(
+							bounds.x + TonccGame.kingXOffset[kidx],
+							bounds.y + TonccGame.kingYOffset[kidx],
+							TonccGame.KING_SIZE, TonccGame.KING_SIZE);
+					k.getSprite().repaint();
+				}
 			}
 		});
+	}
+
+	public int getScore(final String col) {
+		return Integer.parseInt(scoreLabels.get(col).getText());
 	}
 
 	private final TonccGame tonccGame;

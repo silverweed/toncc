@@ -30,6 +30,10 @@ class King {
 		}
 	}
 
+	public King(int colorNum) {
+		this(colorNum == 0 ? Color.RED : colorNum == 1 ? Color.BLUE : Color.YELLOW);
+	}
+
 	public King(King.Color color) {
 		this.color = color;
 		try {
