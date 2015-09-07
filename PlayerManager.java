@@ -168,11 +168,12 @@ class PlayerManager extends JPanel {
 	 * - moving in TOP_LEFT direction decrements x and y by 1 (moving BOTTOM_RIGHT increments);
 	 * - moving in TOP_RIGHT direction decrements only x by 1 (moving BOTTOM_LEFT increments);
 	 * - moving in LEFT direction decrements only y by 1 (moving RIGHT increments);
-	 * - if a move would result in a coordinate with mod > 4, the
-	 *   boundary conditions apply:
+	 * - if a move would result in a coordinate with |x|, |y| or |z| greater than 2, the
+	 *   following boundary conditions apply:
 	 *   1) if direction was TOP_RIGHT or BOTTOM_LEFT, swap original x and z;
 	 *   2) if direction was TOP_LEFT or BOTTOM_RIGHT, swap original x and y, and flip their sign;
 	 *   3) if direction was LEFT or RIGHT, swap original y and z, and flip their sign.
+	 * As an extra constraint, a king cannot step back onto the MIND once it exited it.
 	 */
 	private class TonccCoordinate {
 		TonccCoordinate(int x, int y) {
