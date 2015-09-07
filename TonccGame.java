@@ -74,7 +74,7 @@ public class TonccGame extends TonccRenderer {
 		add(king[1].getSprite(), new Integer(2));
 		add(king[2].getSprite(), new Integer(3));
 
-		for(Map.Entry<String,TonccCellRenderer> entry : cellRenderers.entrySet()) {
+		/*for(Map.Entry<String,TonccCellRenderer> entry : cellRenderers.entrySet()) {
 			final TonccCellRenderer tcr = entry.getValue();
 			final String id = entry.getKey();
 			if(id.equals("MIND")) continue;
@@ -113,7 +113,7 @@ public class TonccGame extends TonccRenderer {
 					popup.show(e.getComponent(), e.getX(), e.getY());
 				}
 			});
-		}
+		}*/
 
 		// Position hints
 		// TRIGGER WARNING: the following code is horribly hacky, don't judge.
@@ -297,7 +297,7 @@ public class TonccGame extends TonccRenderer {
 						? "It's a draw"
 						: "Winner is: " + winner.getKey()),
 					"Game Over",
-					JOptionPane.OK_OPTION);
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 		SwingUtilities.invokeLater(() -> {
 			kingdoms.repaint();
