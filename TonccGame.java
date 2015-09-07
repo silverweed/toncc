@@ -18,7 +18,7 @@ public class TonccGame extends TonccRenderer {
 
 	public final static String[] KINGS = { "Red", "Blue", "Yellow" };
 	static final int KING_SIZE = 34;
-	static final int INITIAL_TOKENS = 2;
+	static final int INITIAL_TOKENS = 6;
 
 	enum Direction {
 		TOP_LEFT,
@@ -298,36 +298,11 @@ public class TonccGame extends TonccRenderer {
 						: "Winner is: " + winner.getKey()),
 					"Game Over",
 					JOptionPane.OK_OPTION);
-			reset();
 		}
 		SwingUtilities.invokeLater(() -> {
 			kingdoms.repaint();
 			repaint();
 		});
-	}
-
-	private void reset() {
-		activeKings.clear();
-		Rectangle bounds = cells.get(9).getBounds();
-		for (int i = 0; i < 3; ++i) {
-			king[i] = new King(i);
-			final int j = i;
-			SwingUtilities.invokeLater(() -> {
-				king[j].getSprite().setBounds(
-						bounds.x + kingXOffset[j],
-						bounds.y + kingYOffset[j],
-						KING_SIZE, KING_SIZE);
-				king[j].getSprite().repaint();
-			});
-			activeKings.add(king[i].getColorString());
-		}
-		for (Component c : cells) {
-			((TonccCellRenderer)c).setOwner(null);
-			((TonccCellRenderer)c).getCell().setState(TonccCell.State.FREE);
-		}
-		for (TonccCellRenderer tcr : kgCellRenderers.values()) {
-			tcr.setOwner(null);
-		}
 	}
 
 	private static String _join(Integer[] it) {
