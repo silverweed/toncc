@@ -114,10 +114,6 @@ public class TonccGame extends TonccRenderer {
 				2 * cellSize, 2 * cellSize);
 		lab.setFont(new Font("Sans", Font.BOLD, 18));
 		add(lab, new Integer(2));
-
-
-		setBackground(Color.BLUE);
-		setOpaque(true);
 	}
 
 	public static void main(String[] args) {
@@ -221,6 +217,26 @@ public class TonccGame extends TonccRenderer {
 		playerManager.updateScore();
 	}
 
+	/** When only 1 king is left, this procedure assigns it all the remaining cells. */
+	private void autoFinish() {
+		// Find out which king is left
+		King king = null;
+		for (King k : kings)
+			if (!k.gameOver) {
+				king = k;
+				break;
+			}
+		for (TonccCellRenderer cell : cells) {
+			if (cell.getCell().id() == TonccCell.Id.MIND) continue;
+			if (cell.getCell().getState() == TonccCell.State.FREE) {
+				kgCellRenderers.get(cell.getCell().id()).setOwner(king);
+				cell.setState(TonccCell.State.CAPTURED);
+			}
+		}
+		king.setTokens(0);
+		checkKingsGameOver();
+	}
+
 	/** Checks if any king is out of tokens; if all kings are done,
 	 * announce game over.
 	 */
@@ -289,6 +305,10 @@ public class TonccGame extends TonccRenderer {
 					winners[i++] = king;
 				}
 			}
+			SwingUtilities.invokeLater(() -> {
+				kingdoms.repaint();
+				repaint();
+			});
 			if (draw) {
 				JOptionPane.showMessageDialog(this, "Game Over! It's a draw.", "Game Over",
 						JOptionPane.INFORMATION_MESSAGE);
@@ -297,6 +317,8 @@ public class TonccGame extends TonccRenderer {
 				JOptionPane.showMessageDialog(this, "Game Over! winner is: " + w, "Game Over",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
+		} else if (gameOverCnt == kings.length - 1) {
+			autoFinish();
 		}
 		SwingUtilities.invokeLater(() -> {
 			kingdoms.repaint();

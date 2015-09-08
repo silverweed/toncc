@@ -78,6 +78,7 @@ enum King {
 
 	public void decTokens() { --tokens; }
 	public int getTokens() { return tokens; }
+	public void setTokens(int n) { tokens = n; }
 
 	public Color getColor() {
 		switch (this) {
