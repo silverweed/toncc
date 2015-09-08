@@ -39,22 +39,17 @@ class TonccCellRenderer extends JLabel {
 	}
 
 	public void setState(final TonccCell.State state) {
-		if(cell.id().equals("MIND")) return;
+		if(cell.id() == TonccCell.Id.MIND) return;
 		cell.setState(state);
 	}
 
-	public void setOwner(final String owner) {
-		if(cell.id().equals("MIND")) return;
+	public void setOwner(final King owner) {
+		if(cell.id() == TonccCell.Id.MIND) return;
 		cell.setOwner(owner);
-		if(owner == null) kingColor = null;
-		else if(owner.equalsIgnoreCase("red"))
-			kingColor = Color.RED;
-		else if(owner.equalsIgnoreCase("blue"))
-			kingColor = Color.BLUE;
-		else if(owner.equalsIgnoreCase("yellow"))
-			kingColor = new Color(0xFFCC00);
+		if (owner == null)
+			kingColor = null;
 		else
-			kingColor = Color.BLACK;
+			kingColor = owner.getColor();
 	}
 
 	public final TonccCell getCell() { return cell; }
@@ -94,9 +89,9 @@ class TonccCellRenderer extends JLabel {
 	public static void main(String[] args) {
 		JFrame panel = new JFrame();
 		panel.setLayout(new FlowLayout());
-		panel.add(new TonccCellRenderer(new TonccCell("MIND")));
-		for(String s : Toncc.MIND) {
-			panel.add(new TonccCellRenderer(new TonccCell(s)));
+		panel.add(new TonccCellRenderer(new TonccCell(TonccCell.Id.MIND)));
+		for(TonccCell.Id id : Toncc.MIND) {
+			panel.add(new TonccCellRenderer(new TonccCell(id)));
 		}
 		SwingConsole.run(panel, "Test TonccCellRenderer");
 	}

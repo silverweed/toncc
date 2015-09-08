@@ -5,87 +5,92 @@ import javax.swing.*;
 import javax.imageio.*;
 import java.io.*;
 
-class King {
-	public enum Color {
-		RED, BLUE, YELLOW;
-		
-		public King.Color getMediumColor() {
-			switch (this) {
-			case RED:
-				return Color.YELLOW;
-			case BLUE:
-				return Color.RED;
-			}
-			return Color.BLUE;
-		}
+enum King {
+	RED, BLUE, YELLOW;
 
-		public King.Color getWeakColor() {
-			switch (this) {
-			case RED:
-				return Color.BLUE;
-			case BLUE:
-				return Color.YELLOW;
-			}
-			return Color.RED;
-		}
-	}
-
-	public King(int colorNum) {
-		this(colorNum == 0 ? Color.RED : colorNum == 1 ? Color.BLUE : Color.YELLOW);
-	}
-
-	public King(King.Color color) {
-		this.color = color;
+	King() {
+		final String color = this.toString().toLowerCase();
 		try {
 			sprite = new JLabel(new ImageIcon(
 					ImageIO.read(getClass().getClassLoader()
-					.getResourceAsStream("toncc/images/" + color.toString().toLowerCase() + ".png"))
+					.getResourceAsStream("toncc/images/" + color + ".png"))
 					.getScaledInstance(-1, TonccGame.KING_SIZE, Image.SCALE_SMOOTH)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
-	public boolean prevailsOn(final King other, final String cellId) {
-		Color col = null;
-		switch (cellId.charAt(0)) {
-		case 'R': col = Color.RED; break;
-		case 'B': col = Color.BLUE; break;
-		case 'Y': col = Color.YELLOW; break;
+		
+	public King getMediumColor() {
+		switch (this) {
+		case RED:
+			return BLUE;
+		case BLUE:
+			return YELLOW;
 		}
-		return color == col ||
-			(color.getMediumColor() == col
-			 && other.color != col);
+		return RED;
+	}
+
+	public King getWeakColor() {
+		switch (this) {
+		case RED:
+			return YELLOW;
+		case BLUE:
+			return RED;
+		}
+		return BLUE;
+	}
+
+	public void repaint() {
+		sprite.repaint();
+	}
+
+	public void setBounds(int x, int y, int w, int h) {
+		sprite.setBounds(x, y, w, h);
+	}
+
+	public boolean prevailsOn(final King other, final TonccCell.Id cellId) {
+		King col = null;
+		switch (cellId.toString().charAt(0)) {
+		case 'R': col = King.RED; break;
+		case 'B': col = King.BLUE; break;
+		case 'Y': col = King.YELLOW; break;
+		}
+		return this == col ||
+			(getMediumColor() == col
+			 && other != col);
 	}
 
 	public JLabel getSprite() { return sprite; }
 
-	@Override
-	public String toString() { return color + " King"; }
-
-	public void setPosition(int cellIdx) {
-		position = cellIdx;
+	public void move(TonccGame.Direction d) {
+		position.move(d);
 	}
-	public int getPosition() { return position; }
 
 	public void decTokens() { --tokens; }
 	public int getTokens() { return tokens; }
 
-	public void setGameOver(boolean b) { gameOver = b; }
-	public boolean isGameOver() { return gameOver; }
+	public Color getColor() {
+		switch (this) {
+		case RED: return Color.RED;
+		case BLUE: return Color.BLUE;
+		case YELLOW: return new Color(0xFFCC00);
+		}
+		return null;
+	}
 
 	public String getColorString() {
-		switch (color) {
+		switch (this) {
 		case RED: return "Red";
 		case BLUE: return "Blue";
 		case YELLOW: return "Yellow";
 		}
 		return "";
 	}
-	
-	private King.Color color;
+
+	int score;
+	boolean gameOver;
+	TonccCoordinate position = new TonccCoordinate(0, 0);
+
 	private JLabel sprite;
-	private int position;
 	private int tokens = TonccGame.INITIAL_TOKENS; 
-	private boolean gameOver;
 }

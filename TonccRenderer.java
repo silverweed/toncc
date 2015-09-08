@@ -46,9 +46,9 @@ public class TonccRenderer extends JLayeredPane {
 				if(line == 2 && i == 2) {
 					// this is the MIND
 					if(cellSize != CELL_SIZE)
-						cell = new TonccCellRenderer(new TonccCell("MIND"), cellSize);
+						cell = new TonccCellRenderer(new TonccCell(TonccCell.Id.MIND), cellSize);
 					else
-						cell = new TonccCellRenderer(new TonccCell("MIND"));
+						cell = new TonccCellRenderer(new TonccCell(TonccCell.Id.MIND));
 				} else {
 					if(cellSize != CELL_SIZE)
 						cell = new TonccCellRenderer(toncc.getCell(count++), cellSize);
@@ -148,8 +148,8 @@ public class TonccRenderer extends JLayeredPane {
 		SwingConsole.run(frame, "Toncc Renderer");
 	}
 
-	protected Map<String, TonccCellRenderer> cellRenderers = new HashMap<>();
-	protected Map<String, TonccCellRenderer> kgCellRenderers = new HashMap<>();
+	protected Map<TonccCell.Id, TonccCellRenderer> cellRenderers = new HashMap<>();
+	protected Map<TonccCell.Id, TonccCellRenderer> kgCellRenderers = new HashMap<>();
 	protected int cellSize, kingdomsCellSize;
 	protected final Toncc toncc;
 	protected final JPanel kingdoms;
