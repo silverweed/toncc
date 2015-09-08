@@ -46,8 +46,10 @@ class PlayerManager extends JPanel {
 				e.printStackTrace();
 			}
 			// Add labels to the gridlayout
-			scoreLabels.put(king, new JLabel("0"));
-			tokenLabels.put(king, new JLabel(""+TonccGame.INITIAL_TOKENS));
+			scoreLabels.put(king, new JLabel("<html><font color=\"blue\">0</font></html>"));
+			scoreLabels.get(king).setFont(new Font("Sans", Font.BOLD, 18));
+			tokenLabels.put(king, new JLabel("<html><font color=\"blue\">"+TonccGame.INITIAL_TOKENS+"</font></html>"));
+			tokenLabels.get(king).setFont(new Font("Sans", Font.BOLD, 18));
 			moveLabels.put(king, new JLabel(undecidedIcon));
 			add(moveLabels.get(king));
 			add(scoreLabels.get(king));
@@ -87,22 +89,29 @@ class PlayerManager extends JPanel {
 		}
 		king.score = score;
 		JLabel label = scoreLabels.get(king);
-		label.setText(""+score);
+		label.setText("<html><font color=\"blue\">"+score+"</font></html>");
 		SwingUtilities.invokeLater(() -> label.repaint());
 
 		// Update number of used tokens
 		for(King k : tonccGame.kings) {
 			JLabel lab = tokenLabels.get(k);
-			lab.setText(""+k.getTokens());
+			lab.setText("<html><font color=\"blue\">"+k.getTokens()+"</font></html>");
 			SwingUtilities.invokeLater(() -> lab.repaint());
 		}
 	}
 
-	void selectMove(final King king, final TonccGame.Direction direction) {
+	public void finalizeScore(final King king, final int extra) {
+		updateScore(king);
+		king.score += extra;
+		scoreLabels.get(king).setText(""+king.score);
+	}
+
+	void selectMove(final King king, final Direction direction) {
 		selectedMove.put(king, direction);
 		if(selectedMove.size() == tonccGame.activeKings.size()) {
 			moveKings();
 			tonccGame.checkCaptures();
+			tonccGame.checkKingsGameOver();
 		} else {
 			moveLabels.get(king).setIcon(decidedIcon);
 			SwingUtilities.invokeLater(() -> moveLabels.get(king).repaint());
@@ -110,9 +119,9 @@ class PlayerManager extends JPanel {
 	}
 
 	private void moveKings() {
-		for(Map.Entry<King, TonccGame.Direction> pair : selectedMove.entrySet()) {
+		for(Map.Entry<King, Direction> pair : selectedMove.entrySet()) {
 			final King king = pair.getKey();
-			final TonccGame.Direction d = pair.getValue();
+			final Direction d = pair.getValue();
 			final int kidx = Arrays.binarySearch(tonccGame.kings, king);
 			king.move(d);
 		}
@@ -144,5 +153,5 @@ class PlayerManager extends JPanel {
 	private Map<King, JLabel> scoreLabels = new EnumMap<>(King.class),
 		                  tokenLabels = new EnumMap<>(King.class),
 				  moveLabels  = new EnumMap<>(King.class);
-	private Map<King, TonccGame.Direction> selectedMove = new EnumMap<>(King.class);
+	private Map<King, Direction> selectedMove = new EnumMap<>(King.class);
 }

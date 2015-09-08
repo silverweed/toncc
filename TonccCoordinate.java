@@ -19,13 +19,13 @@ package toncc;
  * @license GNU GPL v3
  */
 public class TonccCoordinate {
-	TonccCoordinate(int x, int y) {
+	public TonccCoordinate(int x, int y) {
 		this.x = x;
 		this.y = y;
 		z = y - x;
 	}
 	
-	void move(TonccGame.Direction d) {
+	void move(Direction d) {
 		int origX = x, origY = y, origZ = y - x;
 		switch(d) {
 		case TOP_LEFT:

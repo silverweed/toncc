@@ -30,7 +30,7 @@ class TonccCellRenderer extends JLabel {
 		try {
 			icon = new ImageIcon(ImageIO.read(getClass().getClassLoader()
 				.getResourceAsStream("toncc/images/"+cell.id()+".png"))
-				.getScaledInstance(size, -1, Image.SCALE_SMOOTH));
+				.getScaledInstance(-1, size, Image.SCALE_SMOOTH));
 			setIcon(icon);
 		} catch(IOException e) {
 			System.err.println("[TonccCellRenderer] Error! Couldn't load icon for cell "+cell.id());
@@ -68,10 +68,6 @@ class TonccCellRenderer extends JLabel {
 			g.setColor(kingColor);
 
 			g.fillRect(0, 0, width, height);
-
-			// paint original with composite
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.6f));
-			g.drawImage(icon.getImage(), 0, 0, width, height, 0, 0, width, height, null);
 		} else {
 			if(cell.getState() == TonccCell.State.FREE)
 				gg.drawImage(icon.getImage(), 0, 0, width, height, 0, 0, width, height, null);

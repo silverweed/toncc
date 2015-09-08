@@ -5,10 +5,7 @@ import javax.imageio.*;
 import java.awt.*;
 import java.util.*;
 
-/** Graphically renders a Toncc class; only works correctly
- * for a regular Toncc table (i.e with 18 cells and a 3-4-5-4-3 
- * layout)
- * 
+/** Graphically renders a Toncc class. 
  * @license GNU GPL v3
  * @author Giacomo Parolini
  */
@@ -126,7 +123,7 @@ public class TonccRenderer extends JLayeredPane {
 
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(cellSize * 10, cellSize * 10);
+		return new Dimension(cellSize * 6, cellSize * 8);
 	}
 
 	public static void main(String[] args) {

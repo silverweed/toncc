@@ -48,6 +48,7 @@ enum King {
 		sprite.setBounds(x, y, w, h);
 	}
 
+	/** @return true if this has a stronger color than `other` on `cellId`, false otherwise */
 	public boolean prevailsOn(final King other, final TonccCell.Id cellId) {
 		King col = null;
 		switch (cellId.toString().charAt(0)) {
@@ -60,9 +61,18 @@ enum King {
 			 && other != col);
 	}
 
+	/** @return true if this king would prevail on 2 colors out of 3 on `other` */
+	public boolean dominates(final King other) {
+		int n = 0;
+		if (prevailsOn(other, TonccCell.Id.RI)) ++n;
+		if (prevailsOn(other, TonccCell.Id.BII)) ++n;
+		if (prevailsOn(other, TonccCell.Id.YI)) ++n;
+		return n == 2;
+	}
+
 	public JLabel getSprite() { return sprite; }
 
-	public void move(TonccGame.Direction d) {
+	public void move(Direction d) {
 		position.move(d);
 	}
 

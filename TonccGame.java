@@ -2,9 +2,11 @@ package toncc;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.io.IOException;
 import static java.awt.event.KeyEvent.*;
 
 /** The main frontend using the Toncc class: displays a
@@ -16,20 +18,8 @@ import static java.awt.event.KeyEvent.*;
  */
 public class TonccGame extends TonccRenderer {
 
-	public final static String[] KINGS = { "Red", "Blue", "Yellow" };
-	static final int KING_SIZE = 34;
+	static final int KING_SIZE = 45;
 	static final int INITIAL_TOKENS = 6;
-
-	enum Direction {
-		TOP_LEFT,
-		TOP,
-		TOP_RIGHT,
-		LEFT,
-		RIGHT,
-		BOTTOM_LEFT,
-		BOTTOM,
-		BOTTOM_RIGHT
-	}
 
 	/** { direction: [red, blue, yellow] } */
 	private final static Map<Direction, Integer[]> commands = new EnumMap<>(Direction.class);
@@ -44,7 +34,7 @@ public class TonccGame extends TonccRenderer {
 	
 	public TonccGame(final Toncc toncc, int... sizes) {
 		super(toncc, sizes);
-	
+
 		// Save the references to the cells before we add
 		// any other component to this panel
 		for (int i = 0; i < getComponentCount(); ++i)
@@ -82,6 +72,7 @@ public class TonccGame extends TonccRenderer {
 		lab.setBounds((int)(bounds.getX() - cellSize),
 				(int)(bounds.getY() - 1.2 * cellSize), 
 				2 * cellSize, 2 * cellSize);
+		lab.setFont(new Font("Sans", Font.BOLD, 18));
 		add(lab, new Integer(2));
 		// Top right
 		bounds = cells.get(2).getBounds();
@@ -89,6 +80,7 @@ public class TonccGame extends TonccRenderer {
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY() - 1.2 * cellSize), 
 				2 * cellSize, 2 * cellSize);
+		lab.setFont(new Font("Sans", Font.BOLD, 18));
 		add(lab, new Integer(2));
 		// Left
 		bounds = cells.get(7).getBounds();
@@ -96,6 +88,7 @@ public class TonccGame extends TonccRenderer {
 		lab.setBounds((int)(bounds.getX() - 0.5 * cellSize),
 				(int)(bounds.getY() - 0.5 * cellSize), 
 				2 * cellSize, 2 * cellSize);
+		lab.setFont(new Font("Sans", Font.BOLD, 18));
 		add(lab, new Integer(2));
 		// Right
 		bounds = cells.get(11).getBounds();
@@ -103,6 +96,7 @@ public class TonccGame extends TonccRenderer {
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY() - 0.5 * cellSize), 
 				2 * cellSize, 2 * cellSize);
+		lab.setFont(new Font("Sans", Font.BOLD, 18));
 		add(lab, new Integer(2));
 		// Bottom left
 		bounds = cells.get(16).getBounds();
@@ -110,6 +104,7 @@ public class TonccGame extends TonccRenderer {
 		lab.setBounds((int)(bounds.getX() - cellSize),
 				(int)(bounds.getY()), 
 				2 * cellSize, 2 * cellSize);
+		lab.setFont(new Font("Sans", Font.BOLD, 18));
 		add(lab, new Integer(2));
 		// Bottom right
 		bounds = cells.get(18).getBounds();
@@ -117,11 +112,16 @@ public class TonccGame extends TonccRenderer {
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY()), 
 				2 * cellSize, 2 * cellSize);
+		lab.setFont(new Font("Sans", Font.BOLD, 18));
 		add(lab, new Integer(2));
+
+
+		setBackground(Color.BLUE);
+		setOpaque(true);
 	}
 
 	public static void main(String[] args) {
-		int cs = -1,  // cell size
+		int cs = 70,  // cell size
 		    kcs = -1; // kingdoms (mind) cell size
 
 		for(int i = 0; i < args.length; ++i) {
@@ -142,12 +142,20 @@ public class TonccGame extends TonccRenderer {
 			}
 		}
 		JFrame frame = new JFrame();
-		frame.setLayout(new GridBagLayout());
+		BackgroundPanel container = new BackgroundPanel();
+
+		try {
+			container.setImage(ImageIO.read(
+					TonccGame.class.getClassLoader()
+					.getResourceAsStream("toncc/images/bg.png")));
+		} catch(Exception e) {
+			System.err.println("[ ERROR ] Couldn't set background image:");
+			e.printStackTrace();
+			container.setBackground(new Color(0x607270));
+		}
+		container.setLayout(new GridBagLayout());
 		TonccGame renderer = null;
-		if(cs != -1 || kcs != -1)
-			renderer = new TonccGame(new Toncc(), cs, kcs);
-		else
-			renderer = new TonccGame(new Toncc());
+		renderer = new TonccGame(new Toncc(), cs, kcs);
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(15, 0, 15, 0);
@@ -155,19 +163,26 @@ public class TonccGame extends TonccRenderer {
 		c.gridheight = 2;
 		c.gridx = 0;
 		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.CENTER;
-		frame.add(renderer, c);
+		c.weighty = 1;
+		c.weightx = 0.7;
+		container.add(renderer, c);
+		c.insets = new Insets(0,0,0,0);
 		c.gridwidth = 1;
 		c.gridheight = 1;
 		c.gridx = 2;
-		frame.add(renderer.getKingdoms(), c);
+		c.weighty = 0.5;
+		c.weightx = 0.3;
+		container.add(renderer.getKingdoms(), c);
 		c.gridy = 1;
 		c.gridheight = 1;
-		frame.add(renderer.playerManager, c);
-		
+		container.add(renderer.playerManager, c);
+	
+		frame.add(container);
 		frame.addKeyListener(renderer.playerMovesListener);
 
-		SwingConsole.run(frame, "Play Toncc!");
+		SwingConsole.run(frame, 832, 624, "Play Toncc!");
 	}
 
 	void checkCaptures() {
@@ -202,15 +217,28 @@ public class TonccGame extends TonccRenderer {
 			toncc.getCell(cellId).setOwner(king);
 			kgCellRenderers.get(cellId).setOwner(king);
 			king.decTokens();
-			// Check king gameover
+		}
+		playerManager.updateScore();
+	}
+
+	/** Checks if any king is out of tokens; if all kings are done,
+	 * announce game over.
+	 */
+	public void checkKingsGameOver() {
+		for (int i = 0; i < kings.length; ++i) {
+			King king = kings[i];
+			if (king.gameOver) continue;
+			final int kidx = i;
 			if (king.getTokens() == 0) {
 				int score = 0;
-				for (int i = 0; i < 3; ++i) {
-					if (!kings[i].gameOver)
+				for (King k : kings) {
+					if (!k.gameOver)
 						++score;
 				}
-				king.score += score;
+				// Finalize this king's score
+				playerManager.finalizeScore(king, score);
 				activeKings.remove(king);
+				// Place the king back on the MIND
 				Rectangle bounds = cells.get(9).getBounds();
 				SwingUtilities.invokeLater(() -> {
 					king.position = new TonccCoordinate(0, 0);
@@ -222,17 +250,21 @@ public class TonccGame extends TonccRenderer {
 				});
 			}
 		}
-		playerManager.updateScore();
+
+		// This must be done after the first check to properly count
+		// the king points
 		int gameOverCnt = 0;
-		for (int i = 0; i < 3; ++i) {
-			if (kings[i].getTokens() == 0) {
-				kings[i].gameOver = true;
+		for (King king : kings) {
+			if (king.getTokens() == 0) {
+				king.gameOver = true;
 				++gameOverCnt;
 			}
 		}
-		if (gameOverCnt == KINGS.length) {
-			// game over
+
+		if (gameOverCnt == kings.length) {
+			// pair with highest score so far
 			Map.Entry<King, Integer> winner = null;
+			// map { king => score }
 			Map<King, Integer> scores = new HashMap<>();
 			for (King king : kings) {
 				int score = king.score;
@@ -241,23 +273,30 @@ public class TonccGame extends TonccRenderer {
 				}
 				scores.put(king, score);
 			}
+			// If 2 kings have the same score, the dominated one wins.
+			// A full draw only happens if all 3 kings have the same score.
 			int i = 0;
 			boolean draw = false;
-			for (int v : scores.values())
-				if (v == winner.getValue()) {
-					if (++i > 1) {
+			King[] winners = new King[2];
+			for (Map.Entry<King, Integer> entry : scores.entrySet()) {
+				King king = entry.getKey();
+				int score = entry.getValue();
+				if (score == winner.getValue()) {
+					if (i == 2) {
 						draw = true;
 						break;
-					}
+					} 
+					winners[i++] = king;
 				}
-
-			JOptionPane.showMessageDialog(
-					this,
-					"Game Over! " + (draw 
-						? "It's a draw"
-						: "Winner is: " + winner.getKey()),
-					"Game Over",
-					JOptionPane.INFORMATION_MESSAGE);
+			}
+			if (draw) {
+				JOptionPane.showMessageDialog(this, "Game Over! It's a draw.", "Game Over",
+						JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				King w = winners[0].dominates(winners[1]) ? winners[1] : winners[0];
+				JOptionPane.showMessageDialog(this, "Game Over! winner is: " + w, "Game Over",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
 		}
 		SwingUtilities.invokeLater(() -> {
 			kingdoms.repaint();
@@ -275,7 +314,7 @@ public class TonccGame extends TonccRenderer {
 		sb.append(del);
 		sb.append("<font color=\"blue\">"+getKeyText(it[1])+"</font>");
 		sb.append(del);
-		sb.append("<font color=\"#fd9100\">"+getKeyText(it[2]).replaceAll("NumPad\\-", "")+"</font>");
+		sb.append("<font color=\"yellow\">"+getKeyText(it[2]).replaceAll("NumPad\\-", "")+"</font>");
 		sb.append("</html>");
 		return sb.toString();
 	}
