@@ -117,6 +117,10 @@ public class TonccGame extends TonccRenderer {
 	}
 
 	public static void main(String[] args) {
+		// enable anti-aliased text:
+		System.setProperty("awt.useSystemAAFontSettings","on");
+		System.setProperty("swing.aatext", "true");
+
 		int cs = 70,  // cell size
 		    kcs = -1; // kingdoms (mind) cell size
 
@@ -138,6 +142,12 @@ public class TonccGame extends TonccRenderer {
 			}
 		}
 		JFrame frame = new JFrame();
+
+		JLabel lab = new JLabel("<html>Virtual T&oacute;ncc by Giacomo Parolini - v1.1 (2015) " +
+				"-- get the source at <font color=\"blue\">https://github.com/silverweed/toncc</font></html>");
+		lab.setFont(new Font("Sans", Font.PLAIN, 12));
+		frame.add(lab, BorderLayout.SOUTH);
+
 		BackgroundPanel container = new BackgroundPanel();
 
 		try {
