@@ -323,8 +323,12 @@ public class TonccGame extends TonccRenderer {
 				JOptionPane.showMessageDialog(this, "Game Over! It's a draw.", "Game Over",
 						JOptionPane.INFORMATION_MESSAGE);
 			} else {
-				King w = winners[0].dominates(winners[1]) ? winners[1] : winners[0];
-				JOptionPane.showMessageDialog(this, "Game Over! winner is: " + w, "Game Over",
+				if (winners[1] != null) {
+					winner = new AbstractMap.SimpleEntry<>(
+							winners[0].dominates(winners[1]) 
+							? winners[1] : winners[0], winner.getValue());
+				}
+				JOptionPane.showMessageDialog(this, "Game Over! Winner is: " + winner.getKey(), "Game Over",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 		} else if (gameOverCnt == kings.length - 1) {
