@@ -237,9 +237,11 @@ public class TonccGame extends TonccRenderer {
 				break;
 			}
 		for (TonccCellRenderer cell : cells) {
-			if (cell.getCell().id() == TonccCell.Id.MIND) continue;
+			TonccCell.Id cellId = cell.getCell().id();
+			if (cellId == TonccCell.Id.MIND) continue;
 			if (cell.getCell().getState() == TonccCell.State.FREE) {
-				kgCellRenderers.get(cell.getCell().id()).setOwner(king);
+				kgCellRenderers.get(cellId).setOwner(king);
+				toncc.getCell(cellId).setOwner(king);
 				cell.setState(TonccCell.State.CAPTURED);
 			}
 		}
@@ -317,6 +319,7 @@ public class TonccGame extends TonccRenderer {
 			}
 			SwingUtilities.invokeLater(() -> {
 				kingdoms.repaint();
+				playerManager.repaint();
 				repaint();
 			});
 			if (draw) {

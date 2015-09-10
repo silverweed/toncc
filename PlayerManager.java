@@ -103,7 +103,7 @@ class PlayerManager extends JPanel {
 	public void finalizeScore(final King king, final int extra) {
 		updateScore(king);
 		king.score += extra;
-		scoreLabels.get(king).setText(""+king.score);
+		scoreLabels.get(king).setText("<html><font color=\"blue\">"+king.score+"</font></html>");
 	}
 
 	void selectMove(final King king, final Direction direction) {
