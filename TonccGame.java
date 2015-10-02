@@ -23,13 +23,23 @@ public class TonccGame extends TonccRenderer {
 
 	/** { direction: [red, blue, yellow] } */
 	private final static Map<Direction, Integer[]> commands = new EnumMap<>(Direction.class);
+	/** The hints shown on screen */
+	private final static Map<Direction, String[]> commandHints = new EnumMap<>(Direction.class);
 	static {
-		commands.put(Direction.TOP_LEFT,     new Integer[] { VK_Q, VK_U, VK_NUMPAD7 });
-		commands.put(Direction.TOP_RIGHT,    new Integer[] { VK_E, VK_O, VK_NUMPAD9 });
-		commands.put(Direction.LEFT,         new Integer[] { VK_A, VK_H, VK_NUMPAD4 });
-		commands.put(Direction.RIGHT,        new Integer[] { VK_D, VK_K, VK_NUMPAD6 });
-		commands.put(Direction.BOTTOM_LEFT,  new Integer[] { VK_Z, VK_B, VK_NUMPAD1 });
-		commands.put(Direction.BOTTOM_RIGHT, new Integer[] { VK_C, VK_M, VK_NUMPAD3 });
+		commands.put(Direction.TOP_LEFT,     new Integer[] { VK_W, VK_Y, VK_P });
+		commands.put(Direction.TOP_RIGHT,    new Integer[] { VK_E, VK_U, VK_OPEN_BRACKET });
+		commands.put(Direction.LEFT,         new Integer[] { VK_A, VK_G, VK_L });
+		commands.put(Direction.RIGHT,        new Integer[] { VK_D, VK_J, VK_QUOTE });
+		commands.put(Direction.BOTTOM_LEFT,  new Integer[] { VK_Z, VK_B, VK_PERIOD });
+		commands.put(Direction.BOTTOM_RIGHT, new Integer[] { VK_X, VK_N, VK_SLASH });
+		// This is necessary for manually translating the input (which is
+		// actually taken from an US keyboard) to the italian layout.
+		commandHints.put(Direction.TOP_LEFT,     new String[] { "W", "Y", "P" }); 
+		commandHints.put(Direction.TOP_RIGHT,    new String[] { "E", "U", "è" }); 
+		commandHints.put(Direction.LEFT,         new String[] { "A", "G", "L" }); 
+		commandHints.put(Direction.RIGHT,        new String[] { "D", "J", "à" }); 
+		commandHints.put(Direction.BOTTOM_LEFT,  new String[] { "Z", "B", "." }); 
+		commandHints.put(Direction.BOTTOM_RIGHT, new String[] { "X", "N", "-" }); 
 	}
 	
 	public TonccGame(final Toncc toncc, int... sizes) {
@@ -68,7 +78,7 @@ public class TonccGame extends TonccRenderer {
 
 		/// Top left movement
 		Rectangle bounds = cells.get(0).getBounds();
-		JLabel lab = new JLabel(_join(commands.get(Direction.TOP_LEFT)));
+		JLabel lab = new JLabel(showCommand(Direction.TOP_LEFT));
 		lab.setBounds((int)(bounds.getX() - cellSize),
 				(int)(bounds.getY() - 1.2 * cellSize), 
 				2 * cellSize, 2 * cellSize);
@@ -76,7 +86,7 @@ public class TonccGame extends TonccRenderer {
 		add(lab, new Integer(2));
 		// Top right
 		bounds = cells.get(2).getBounds();
-		lab = new JLabel(_join(commands.get(Direction.TOP_RIGHT)));
+		lab = new JLabel(showCommand(Direction.TOP_RIGHT));
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY() - 1.2 * cellSize), 
 				2 * cellSize, 2 * cellSize);
@@ -84,7 +94,7 @@ public class TonccGame extends TonccRenderer {
 		add(lab, new Integer(2));
 		// Left
 		bounds = cells.get(7).getBounds();
-		lab = new JLabel(_join(commands.get(Direction.LEFT), ",<br>"));
+		lab = new JLabel(showCommand(Direction.LEFT, ",<br>"));
 		lab.setBounds((int)(bounds.getX() - 0.5 * cellSize),
 				(int)(bounds.getY() - 0.5 * cellSize), 
 				2 * cellSize, 2 * cellSize);
@@ -92,7 +102,7 @@ public class TonccGame extends TonccRenderer {
 		add(lab, new Integer(2));
 		// Right
 		bounds = cells.get(11).getBounds();
-		lab = new JLabel(_join(commands.get(Direction.RIGHT), ",<br>"));
+		lab = new JLabel(showCommand(Direction.RIGHT, ",<br>"));
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY() - 0.5 * cellSize), 
 				2 * cellSize, 2 * cellSize);
@@ -100,7 +110,7 @@ public class TonccGame extends TonccRenderer {
 		add(lab, new Integer(2));
 		// Bottom left
 		bounds = cells.get(16).getBounds();
-		lab = new JLabel(_join(commands.get(Direction.BOTTOM_LEFT)));
+		lab = new JLabel(showCommand(Direction.BOTTOM_LEFT));
 		lab.setBounds((int)(bounds.getX() - cellSize),
 				(int)(bounds.getY()), 
 				2 * cellSize, 2 * cellSize);
@@ -108,7 +118,7 @@ public class TonccGame extends TonccRenderer {
 		add(lab, new Integer(2));
 		// Bottom right
 		bounds = cells.get(18).getBounds();
-		lab = new JLabel(_join(commands.get(Direction.BOTTOM_RIGHT)));
+		lab = new JLabel(showCommand(Direction.BOTTOM_RIGHT));
 		lab.setBounds((int)(bounds.getX() + 1.2 * cellSize),
 				(int)(bounds.getY()), 
 				2 * cellSize, 2 * cellSize);
@@ -323,7 +333,9 @@ public class TonccGame extends TonccRenderer {
 				repaint();
 			});
 			if (draw) {
-				JOptionPane.showMessageDialog(this, "Game Over! It's a draw.", "Game Over",
+				JOptionPane.showMessageDialog(this, 
+						"Game Over! It's a draw.",
+						"Game Over",
 						JOptionPane.INFORMATION_MESSAGE);
 			} else {
 				if (winners[1] != null) {
@@ -331,7 +343,9 @@ public class TonccGame extends TonccRenderer {
 							winners[0].dominates(winners[1]) 
 							? winners[1] : winners[0], winner.getValue());
 				}
-				JOptionPane.showMessageDialog(this, "Game Over! Winner is: " + winner.getKey(), "Game Over",
+				JOptionPane.showMessageDialog(this, 
+						"Game Over! Winner is: " + winner.getKey(), 
+						"Game Over",
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 		} else if (gameOverCnt == kings.length - 1) {
@@ -343,17 +357,18 @@ public class TonccGame extends TonccRenderer {
 		});
 	}
 
-	private static String _join(Integer[] it) {
-		return _join(it, ", ");
+	private static String showCommand(Direction cmd) {
+		return showCommand(cmd, ", ");
 	}
 
-	private static String _join(Integer[] it, String del) {
+	private static String showCommand(Direction cmd, String del) {
 		StringBuilder sb = new StringBuilder("<html>");
-		sb.append("<font color=\"red\">"+getKeyText(it[0])+"</font>");
+		String[] hints = commandHints.get(cmd);
+		sb.append("<font color=\"red\">"+hints[0]+"</font>");
 		sb.append(del);
-		sb.append("<font color=\"blue\">"+getKeyText(it[1])+"</font>");
+		sb.append("<font color=\"blue\">"+hints[1]+"</font>");
 		sb.append(del);
-		sb.append("<font color=\"yellow\">"+getKeyText(it[2]).replaceAll("NumPad\\-", "")+"</font>");
+		sb.append("<font color=\"yellow\">"+hints[2]+"</font>");
 		sb.append("</html>");
 		return sb.toString();
 	}
