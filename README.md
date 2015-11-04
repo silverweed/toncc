@@ -7,8 +7,7 @@ The game
 --------------------------------
 Tóncc<sup>®</sup> is an abstract strategy game by Davide Bassanelli: <a>http://www.toncc.it/</a>
 
-This is a simple interface to the game written in Java, with currently no particular purpose.
-It might be use as a graphical frontend to a computer version of the game in future.
+This program allows 3 players to play Tóncc locally on the same machine.
 
 License
 --------------------------------
